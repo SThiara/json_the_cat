@@ -1,17 +1,35 @@
 const request = require('request');
-const breedReq = process.argv[2];
 
-request('https://api.thecatapi.com/v1/breeds', (error, response, body) => {
-  if (error) {
-    console.error(error);
-  }
-  if (!error) {
-    const breedInfo = JSON.parse(body);
-    for (let catObject of breedInfo) {
-      if (catObject.name === breedReq) {
-        return console.log(catObject.description);
+/* const fetchBreedDescription = (breedName, callback) => {
+  request('https://api.thecatapi.com/v1/breeds', (error, response, body) => {
+    let breedToReturn;
+    if (!error) {
+      const breedInfo = JSON.parse(body);
+      for (let catObject of breedInfo) {
+        if (catObject.name === breedName) {
+          breedToReturn = catObject.description;
+        }
       }
     }
-    return console.log("no neko");
-  }
-});
+    callback(error, breedToReturn);
+  });
+}; */
+
+const fetchBreedDescription = (breedName, callback) => {
+  request(`https://api.thecatapi.com/v1/breeds/search?q=${breedName}`, (error, response, body) => {
+    let breedToReturn;
+    if (!error) {
+      const breedInfo = JSON.parse(body);
+      if (breedInfo[0] !== undefined) {
+      breedToReturn = breedInfo[0].description;
+      } else {
+        error = "404, breed not found";
+      }
+    }
+    callback(error, breedToReturn);
+  });
+};
+
+module.exports = {
+  fetchBreedDescription
+};
